@@ -9,33 +9,53 @@ export default function App() {
   const [posts, setPosts] = useState([]);
   const [post, setPost] = useState(null); // post I am editing
 
-  const handleAddPost = (newPost) => {
-    const id = posts.length ? posts[posts.length - 1].id + 1 : 1;
-
-    setPosts([
-      ...posts,
-      {
-        id,
+  const handleAddPost = async (newPost) => {
+    try {
+      const id = posts.length ? Number(posts[posts.length - 1].id) + 1 : 1;
+      const nextPost = {
         ...newPost,
-      },
-    ]);
-  };
+        id: id.toString(),
+      };
+      const response = await axios.post(
+        `http://localhost:3000/posts`,
+        nextPost
+      );
 
-  const handleDeletePost = (postId) => {
-    if (confirm("Are you sure you want to delete the post?")) {
-      const newPosts = posts.filter((post) => post.id !== postId);
-      setPosts(newPosts);
-    } else {
-      console("You chose not to delete the post!");
+      if (response.data) {
+        setPosts([...posts, response.data]);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const handleEditPost = (updatedPost) => {
-    const updatedPosts = posts.map((post) =>
-      post.id === updatedPost.id ? updatedPost : post
-    );
+  const handleDeletePost = async (postId) => {
+    try {
+      if (confirm("Are you sure you want to delete the post?")) {
+        const newPosts = posts.filter((post) => post.id !== postId);
+        await axios.delete(`http://localhost:3000/posts/${postId}`);
+        setPosts(newPosts);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    setPosts(updatedPosts);
+  const handleEditPost = async (updatedPost) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/posts/${updatedPost.id}`,
+        updatedPost
+      );
+      if (response.data) {
+        const updatedPosts = posts.map((post) =>
+          post.id === updatedPost.id ? response.data : post
+        );
+        setPosts(updatedPosts);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   // load all posts for the first time
