@@ -3,7 +3,7 @@ import "./App.css";
 import AddPost from "./components/AddPost.jsx";
 import EditPost from "./components/EditPost.jsx";
 import Posts from "./components/Posts";
-import axios from "axios";
+import { api } from "./api/api.js";
 
 export default function App() {
   const [posts, setPosts] = useState([]);
@@ -16,10 +16,7 @@ export default function App() {
         ...newPost,
         id: id.toString(),
       };
-      const response = await axios.post(
-        `http://localhost:3000/posts`,
-        nextPost
-      );
+      const response = await api.post(`/posts`, nextPost);
 
       if (response.data) {
         setPosts([...posts, response.data]);
@@ -33,7 +30,7 @@ export default function App() {
     try {
       if (confirm("Are you sure you want to delete the post?")) {
         const newPosts = posts.filter((post) => post.id !== postId);
-        await axios.delete(`http://localhost:3000/posts/${postId}`);
+        await api.delete(`/posts/${postId}`);
         setPosts(newPosts);
       }
     } catch (err) {
@@ -43,10 +40,7 @@ export default function App() {
 
   const handleEditPost = async (updatedPost) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:3000/posts/${updatedPost.id}`,
-        updatedPost
-      );
+      const response = await api.patch(`/posts/${updatedPost.id}`, updatedPost);
       if (response.data) {
         const updatedPosts = posts.map((post) =>
           post.id === updatedPost.id ? response.data : post
@@ -62,7 +56,7 @@ export default function App() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/posts`);
+        const response = await api.get(`/posts`);
         if (response.data) {
           setPosts(response.data);
         }
