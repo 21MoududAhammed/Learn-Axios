@@ -8,8 +8,10 @@ import { api } from "./api/api.js";
 export default function App() {
   const [posts, setPosts] = useState([]);
   const [post, setPost] = useState(null); // post I am editing
+  const [error, setError] = useState(null);
 
   const handleAddPost = async (newPost) => {
+    console.log('clicked');
     try {
       const id = posts.length ? Number(posts[posts.length - 1].id) + 1 : 1;
       const nextPost = {
@@ -39,6 +41,7 @@ export default function App() {
   };
 
   const handleEditPost = async (updatedPost) => {
+    console.log(updatedPost);
     try {
       const response = await api.patch(`/posts/${updatedPost.id}`, updatedPost);
       if (response.data) {
@@ -46,6 +49,7 @@ export default function App() {
           post.id === updatedPost.id ? response.data : post
         );
         setPosts(updatedPosts);
+        setPost(null);
       }
     } catch (err) {
       console.log(err);
@@ -61,7 +65,7 @@ export default function App() {
           setPosts(response.data);
         }
       } catch (err) {
-        console.log(err);
+        setError(err.message);
       }
     };
     fetchPosts();
@@ -87,6 +91,7 @@ export default function App() {
           ) : (
             <EditPost post={post} onEditPost={handleEditPost} />
           )}
+          {error && <div>{error}</div>}
         </div>
       </div>
     </div>
